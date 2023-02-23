@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokemon Shop</title>
+    <!-- css -->
+    <link rel="stylesheet" href="./src/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  </head>
+
+  <body>
+    <h1 class="title">Pokemon Shop</h1>
+    <div class="container">
+      <div class="card">
+        <img src="./src/assets/images/1.png" class="mask" />
+        <h3 class="name">Pikachu</h3>
+        <div class="box-price">
+          <p>0.0002 ETH</p>
+          <button
+            id="btn-buy"
+            class="button"
+            onclick="btnBuy('Pikachu', 200000000000000)"
+          >
+            Buy
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="./src/assets/images/2.png" class="mask" />
+        <h3 class="name">Eevee</h3>
+        <div class="box-price">
+          <p>0.00025 ETH</p>
+          <button id="btn_buy" class="button" onclick="btnBuy('Eevee', 250000000000000)">Buy</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="./src/assets/images/3.png" class="mask" />
+        <h3 class="name">Charizard</h3>
+        <div class="box-price">
+          <p>0.0010 ETH</p>
+          <button id="btn_buy" class="button" onclick="btnBuy('Charizard', 1000000000000000)">Buy</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="./src/assets/images/4.png" class="mask" />
+        <h3 class="name">Squirtle</h3>
+        <div class="box-price">
+          <p>0.0003 ETH</p>
+          <button id="btn_buy" class="button" onclick="btnBuy('Squirtle', 300000000000000)">Buy</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="./src/assets/images/5.png" class="mask" />
+        <h3 class="name">Tododile</h3>
+        <div class="box-price">
+          <p>0.0005 ETH</p>
+          <button id="btn_buy" class="button" onclick="btnBuy('Tododile', 500000000000000)">Buy</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <img src="./src/assets/images/6.png" class="mask" />
+        <h3 class="name">Zorua</h3>
+        <div class="box-price">
+          <p>0.0004 ETH</p>
+          <button id="btn_buy" class="button" onclick="btnBuy('Zorua', 400000000000000)">Buy</button>
+        </div>
+      </div>
+      <table>
+        <tr>
+          <th>Time</th>
+          <th>Pokemon</th>
+          <th>Owner</th>
+        </tr>
+        <tr>
+          <td id="time1"></td>
+          <td id="character1"></td>
+          <td id="owner1"></td>
+        </tr>
+        <tr>
+          <td id="time2"></td>
+          <td id="character2"></td>
+          <td id="owner2"></td>
+        </tr>
+        <tr>
+          <td id="time3"></td>
+          <td id="character3"></td>
+          <td id="owner3"></td>
+        </tr>
+        <tr>
+          <td id="time4"></td>
+          <td id="character4"></td>
+          <td id="owner4"></td>
+        </tr>
+        <tr>
+          <td id="time5"></td>
+          <td id="character5"></td>
+          <td id="owner5"></td>
+        </tr>
+        <tr>
+          <td id="time6"></td>
+          <td id="character6"></td>
+          <td id="owner6"></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- js -->
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+    <script>
+      async function loadWeb3() {
+        if (window.ethereum) {
+          window.web3 = new Web3(window.ethereum);
+          window.ethereum.enable();
+        }
+      }
+
+      let currentAccount = null;
+      window.ethereum
+        .request({ method: "eth_accounts" })
+        .then(handleAccountsChanged)
+        .catch((err) => {
+          console.error(err);
+        });
+
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
+
+      function handleAccountsChanged(accounts) {
+        if (accounts.length === 0) {
+          // MetaMask is locked or the user has not connected any accounts
+          console.log("Please connect to MetaMask.");
+        } else if (accounts[0] !== currentAccount) {
+          currentAccount = accounts[0];
+        }
+      }
+
+      let abi = [
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "character",
+              type: "string",
+            },
+          ],
+          name: "Add",
+          type: "event",
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+          ],
+          name: "buy",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+      ];
+
+      async function loadContract() {
+        return await new window.web3.eth.Contract(
+          abi,
+          "0xd66233c69153470F4B90CA9766F4cFe49e461978"
+        );
+      }
+
+      async function load() {
+        await loadWeb3();
+        window.contract = await loadContract();
+        updateStatus("Ready!");
+      }
+
+      function updateStatus(status) {
+        const statusEl = document.getElementById("status");
+        statusEl.innerHTML = status;
+        console.log(status);
+      }
+
+      var i = 0;
+
+      function btnBuy(name, eth) {
+        console.log(currentAccount);
+        window.contract.methods
+          .buy(name)
+          .send({ from: currentAccount, value: eth }, function (error, result) {
+            $("#result").html(result);
+          });
+        window.contract.once("Add", {}, function (error, event) {
+          if (!error) {
+            console.log(event);
+            var h = new Date().getHours();
+            var m = new Date().getMinutes();
+            $("#result").html(
+              "Name:" +
+                event.returnValues.character +
+                "<br/>time:" +
+                h +
+                ":" +
+                m +
+                "<br/>owner:" +
+                event.returnValues.owner
+            );
+            i++;
+            $("#time" + i).html(h + ":" + m);
+            $("#character" + i).html(event.returnValues.character);
+            $("#owner" + i).html(event.returnValues.owner);
+          }
+        });
+
+        window.contract.once("RegistrationError", {}, function (error, event) {
+          if (!error) {
+            console.log(event);
+            $("#result").html(
+              "Error: " +
+                event.returnValues.text +
+                "<br/>Reason:" +
+                event.returnValues.reason
+            );
+          }
+        });
+      }
+
+      function timenow() {
+        var s = new Date().toLocaleTimeString("en-US");
+        console.log(s);
+        return s;
+      }
+      load();
+    </script>
+  </body>
+</html>
